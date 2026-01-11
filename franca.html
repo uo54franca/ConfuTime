@@ -20,9 +20,7 @@ textarea,input,button{
     border-radius:8px;border:none;font-size:14px
 }
 textarea{resize:none;height:120px}
-button{
-    font-weight:bold;cursor:pointer
-}
+button{font-weight:bold;cursor:pointer}
 .primary{background:#38bdf8;color:#020617}
 .primary:hover{background:#0ea5e9}
 .save{background:#22c55e;color:#022c22}
@@ -33,7 +31,12 @@ button{
     background:#020617;border:1px solid #1e293b;
     padding:10px;border-radius:8px;margin-top:10px
 }
-.team h3,.history h3{margin:0 0 6px;color:#22d3ee}
+.team h3{margin:0 0 6px;color:#22d3ee}
+.time-stamp{
+    font-size:12px;
+    color:#94a3b8;
+    margin-bottom:6px
+}
 .actions{display:flex;gap:8px}
 </style>
 </head>
@@ -65,6 +68,12 @@ const shuffle=a=>{
         const j=Math.floor(Math.random()*(i+1));
         [a[i],a[j]]=[a[j],a[i]];
     }
+};
+
+const formatDate=()=>{
+    const d=new Date();
+    return d.toLocaleDateString("pt-BR")+" "+
+           d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 };
 
 const loadHistory=()=>{
@@ -99,10 +108,11 @@ function shuffleTeams(){
 function saveCurrent(){
     if(!currentHTML) return;
     const h=JSON.parse(localStorage.getItem(key)||"[]");
-    h.unshift(currentHTML);
+    const stamp=`<div class="time-stamp">📅 ${formatDate()}</div>`;
+    h.unshift(`<div class="history">${stamp}${currentHTML}</div>`);
     localStorage.setItem(key,JSON.stringify(h.slice(0,10)));
     loadHistory();
-    alert("Time salvo no histórico ✅");
+    alert("Time salvo com data e hora ✅");
 }
 
 function deleteCurrent(){
