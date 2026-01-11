@@ -16,22 +16,25 @@ body{
 }
 h1{text-align:center;color:#38bdf8}
 textarea,input,button{
-    width:100%;padding:10px;margin:10px 0;
+    width:100%;padding:10px;margin:8px 0;
     border-radius:8px;border:none;font-size:14px
 }
 textarea{resize:none;height:120px}
 button{
-    background:#38bdf8;color:#020617;
     font-weight:bold;cursor:pointer
 }
-button:hover{background:#0ea5e9}
+.primary{background:#38bdf8;color:#020617}
+.primary:hover{background:#0ea5e9}
+.save{background:#22c55e;color:#022c22}
+.save:hover{background:#16a34a}
+.delete{background:#ef4444;color:#fff}
+.delete:hover{background:#dc2626}
 .team,.history{
     background:#020617;border:1px solid #1e293b;
     padding:10px;border-radius:8px;margin-top:10px
 }
 .team h3,.history h3{margin:0 0 6px;color:#22d3ee}
-.clear{background:#ef4444;color:#fff}
-.clear:hover{background:#dc2626}
+.actions{display:flex;gap:8px}
 </style>
 </head>
 <body>
@@ -42,15 +45,20 @@ button:hover{background:#0ea5e9}
 <textarea id="names" placeholder="1 jogador por linha"></textarea>
 <input type="number" id="qtd" min="1" value="2">
 
-<button onclick="shuffleTeams()">Embaralhar</button>
-<button class="clear" onclick="clearHistory()">Limpar Histórico</button>
+<button class="primary" onclick="shuffleTeams()">Embaralhar</button>
+
+<div class="actions" id="actions" style="display:none">
+    <button class="save" onclick="saveCurrent()">Salvar Time</button>
+    <button class="delete" onclick="deleteCurrent()">Excluir Time</button>
+</div>
 
 <div id="result"></div>
 <div id="history"></div>
 </div>
 
 <script>
-const historyKey="teamHistory";
+const key="teamHistory";
+let currentHTML="";
 
 const shuffle=a=>{
     for(let i=a.length-1;i>0;i--){
@@ -59,14 +67,8 @@ const shuffle=a=>{
     }
 };
 
-const saveHistory=html=>{
-    const h=JSON.parse(localStorage.getItem(historyKey)||"[]");
-    h.unshift(html);
-    localStorage.setItem(historyKey,JSON.stringify(h.slice(0,10)));
-};
-
 const loadHistory=()=>{
-    const h=JSON.parse(localStorage.getItem(historyKey)||"[]");
+    const h=JSON.parse(localStorage.getItem(key)||"[]");
     document.getElementById("history").innerHTML=
         h.length?`<h2>📜 Histórico</h2>`+h.join(""):"";
 };
@@ -76,7 +78,6 @@ function shuffleTeams(){
         .split("\n").map(n=>n.trim()).filter(Boolean);
     const qtd=+document.getElementById("qtd").value;
     const result=document.getElementById("result");
-    result.innerHTML="";
 
     if(!names.length||qtd<1||names.length<qtd)
         return alert("Dados inválidos!");
@@ -90,14 +91,24 @@ function shuffleTeams(){
             ${names.slice(i,i+qtd).join("<br>")}
         </div>`;
     }
+    currentHTML=html;
     result.innerHTML=html;
-    saveHistory(html);
-    loadHistory();
+    document.getElementById("actions").style.display="flex";
 }
 
-function clearHistory(){
-    localStorage.removeItem(historyKey);
-    document.getElementById("history").innerHTML="";
+function saveCurrent(){
+    if(!currentHTML) return;
+    const h=JSON.parse(localStorage.getItem(key)||"[]");
+    h.unshift(currentHTML);
+    localStorage.setItem(key,JSON.stringify(h.slice(0,10)));
+    loadHistory();
+    alert("Time salvo no histórico ✅");
+}
+
+function deleteCurrent(){
+    currentHTML="";
+    document.getElementById("result").innerHTML="";
+    document.getElementById("actions").style.display="none";
 }
 
 loadHistory();
