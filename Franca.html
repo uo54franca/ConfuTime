@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Embaralha Times</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif; background: #0f172a; color: #e5e7eb; display: flex; justify-content: center;padding: 30px;
+        }
+
+        .container {
+            background: #020617; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #38bdf8;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: none;
+            height: 120px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #38bdf8;
+            color: #020617;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0ea5e9;
+        }
+
+        .result {
+            margin-top: 20px;
+        }
+
+        .team {
+            background: #020617;
+            border: 1px solid #1e293b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .team h3 {
+            margin: 0 0 8px 0;
+            color: #22d3ee;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚽ Embaralha Times</h1>
+
+    <label>Nomes dos jogadores (um por linha):</label>
+    <textarea id="names" placeholder="Ex:&#10;João&#10;Maria&#10;Pedro&#10;Ana"></textarea>
+
+    <label>Quantidade de pessoas por time:</label>
+    <input type="number" id="playersPerTeam" min="1" value="2">
+
+    <button onclick="shuffleTeams()">Embaralhar Times</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function shuffleTeams() {
+        const namesText = document.getElementById("names").value.trim();
+        const playersPerTeam = parseInt(document.getElementById("playersPerTeam").value);
+        const resultDiv = document.getElementById("result");
+
+        resultDiv.innerHTML = "";
+
+        if (!namesText) {
+            alert("Digite pelo menos um nome!");
+            return;
+        }
+
+        if (playersPerTeam <= 0) {
+            alert("Quantidade por time inválida!");
+            return;
+        }
+
+        let names = namesText.split("\n").map(n => n.trim()).filter(n => n);
+
+        if (names.length < playersPerTeam) {
+            alert("Jogadores insuficientes para formar um time!");
+            return;
+        }
+
+        shuffleArray(names);
+
+        let teamNumber = 1;
+
+        for (let i = 0; i < names.length; i += playersPerTeam) {
+            const teamPlayers = names.slice(i, i + playersPerTeam);
+
+            const teamDiv = document.createElement("div");
+            teamDiv.className = "team";
+
+            teamDiv.innerHTML = `
+                <h3>Time ${teamNumber}</h3>
+                <p>${teamPlayers.join("<br>")}</p>
+            `;
+
+            resultDiv.appendChild(teamDiv);
+            teamNumber++;
+        }
+    }
+</script>
+
+</body>
+</html>
