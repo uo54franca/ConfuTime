@@ -1,140 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Embaralha Times</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif; background: #0f172a; color: #e5e7eb; display: flex; justify-content: center;padding: 30px;
-        }
-
-        .container {
-            background: #020617; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 0 15px rgba(0,0,0,0.5);
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #38bdf8;
-        }
-
-        textarea, input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-        }
-
-        textarea {
-            resize: none;
-            height: 120px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            background: #38bdf8;
-            color: #020617;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #0ea5e9;
-        }
-
-        .result {
-            margin-top: 20px;
-        }
-
-        .team {
-            background: #020617;
-            border: 1px solid #1e293b;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .team h3 {
-            margin: 0 0 8px 0;
-            color: #22d3ee;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Embaralha Times</title>
+<style>
+*{box-sizing:border-box}
+body{
+    font-family:Arial,sans-serif;
+    background:#0f172a;color:#e5e7eb;
+    display:flex;justify-content:center;padding:30px
+}
+.container{
+    background:#020617;padding:25px;border-radius:12px;
+    max-width:520px;width:100%;box-shadow:0 0 15px #0008
+}
+h1{text-align:center;color:#38bdf8}
+textarea,input,button{
+    width:100%;padding:10px;margin:10px 0;
+    border-radius:8px;border:none;font-size:14px
+}
+textarea{resize:none;height:120px}
+button{
+    background:#38bdf8;color:#020617;
+    font-weight:bold;cursor:pointer
+}
+button:hover{background:#0ea5e9}
+.team,.history{
+    background:#020617;border:1px solid #1e293b;
+    padding:10px;border-radius:8px;margin-top:10px
+}
+.team h3,.history h3{margin:0 0 6px;color:#22d3ee}
+.clear{background:#ef4444;color:#fff}
+.clear:hover{background:#dc2626}
+</style>
 </head>
 <body>
 
 <div class="container">
-    <h1>⚽ Embaralha Times</h1>
+<h1>⚽ Embaralha Times</h1>
 
-    <label>Nomes dos jogadores (um por linha):</label>
-    <textarea id="names" placeholder="Ex:&#10;João&#10;Maria&#10;Pedro&#10;Ana"></textarea>
+<textarea id="names" placeholder="1 jogador por linha"></textarea>
+<input type="number" id="qtd" min="1" value="2">
 
-    <label>Quantidade de pessoas por time:</label>
-    <input type="number" id="playersPerTeam" min="1" value="2">
+<button onclick="shuffleTeams()">Embaralhar</button>
+<button class="clear" onclick="clearHistory()">Limpar Histórico</button>
 
-    <button onclick="shuffleTeams()">Embaralhar Times</button>
-
-    <div class="result" id="result"></div>
+<div id="result"></div>
+<div id="history"></div>
 </div>
 
 <script>
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
+const historyKey="teamHistory";
+
+const shuffle=a=>{
+    for(let i=a.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
     }
+};
 
-    function shuffleTeams() {
-        const namesText = document.getElementById("names").value.trim();
-        const playersPerTeam = parseInt(document.getElementById("playersPerTeam").value);
-        const resultDiv = document.getElementById("result");
+const saveHistory=html=>{
+    const h=JSON.parse(localStorage.getItem(historyKey)||"[]");
+    h.unshift(html);
+    localStorage.setItem(historyKey,JSON.stringify(h.slice(0,10)));
+};
 
-        resultDiv.innerHTML = "";
+const loadHistory=()=>{
+    const h=JSON.parse(localStorage.getItem(historyKey)||"[]");
+    document.getElementById("history").innerHTML=
+        h.length?`<h2>📜 Histórico</h2>`+h.join(""):"";
+};
 
-        if (!namesText) {
-            alert("Digite pelo menos um nome!");
-            return;
-        }
+function shuffleTeams(){
+    const names=document.getElementById("names").value
+        .split("\n").map(n=>n.trim()).filter(Boolean);
+    const qtd=+document.getElementById("qtd").value;
+    const result=document.getElementById("result");
+    result.innerHTML="";
 
-        if (playersPerTeam <= 0) {
-            alert("Quantidade por time inválida!");
-            return;
-        }
+    if(!names.length||qtd<1||names.length<qtd)
+        return alert("Dados inválidos!");
 
-        let names = namesText.split("\n").map(n => n.trim()).filter(n => n);
-
-        if (names.length < playersPerTeam) {
-            alert("Jogadores insuficientes para formar um time!");
-            return;
-        }
-
-        shuffleArray(names);
-
-        let teamNumber = 1;
-
-        for (let i = 0; i < names.length; i += playersPerTeam) {
-            const teamPlayers = names.slice(i, i + playersPerTeam);
-
-            const teamDiv = document.createElement("div");
-            teamDiv.className = "team";
-
-            teamDiv.innerHTML = `
-                <h3>Time ${teamNumber}</h3>
-                <p>${teamPlayers.join("<br>")}</p>
-            `;
-
-            resultDiv.appendChild(teamDiv);
-            teamNumber++;
-        }
+    shuffle(names);
+    let html="";
+    for(let i=0,t=1;i<names.length;i+=qtd,t++){
+        html+=`
+        <div class="team">
+            <h3>Time ${t}</h3>
+            ${names.slice(i,i+qtd).join("<br>")}
+        </div>`;
     }
+    result.innerHTML=html;
+    saveHistory(html);
+    loadHistory();
+}
+
+function clearHistory(){
+    localStorage.removeItem(historyKey);
+    document.getElementById("history").innerHTML="";
+}
+
+loadHistory();
 </script>
 
 </body>
